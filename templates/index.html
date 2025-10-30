@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement Predictor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #2b4c7e;
+      margin-bottom: 20px;
+    }
+
+    form {
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      width: 340px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #2b4c7e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1f355a;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+</head>
+<body>
+  <h1>Placement Prediction</h1>
+
+  <form id="placementForm">
+    <label>CGPA:</label>
+    <input type="number" step="0.1" id="CGPA" required />
+
+    <label>Internships:</label>
+    <input type="number" step="1" id="Internships" required />
+
+    <label>Projects:</label>
+    <input type="number" step="1" id="Projects" required />
+
+    <label>Workshops / Certifications:</label>
+    <input type="number" step="1" id="Workshops_Certifications" required />
+
+    <label>Aptitude Test Score:</label>
+    <input type="number" step="0.1" id="AptitudeTestScore" required />
+
+    <label>Soft Skills Rating (1–10):</label>
+    <input type="number" step="0.1" id="SoftSkillsRating" required />
+
+    <label>Extracurricular Activities:</label>
+    <input type="number" step="1" id="ExtracurricularActivities" required />
+
+    <label>Placement Training (1 = Yes, 0 = No):</label>
+    <input type="number" step="1" id="PlacementTraining" required />
+
+    <label>SSC Marks (%):</label>
+    <input type="number" step="0.1" id="SSC_Marks" required />
+
+    <label>HSC Marks (%):</label>
+    <input type="number" step="0.1" id="HSC_Marks" required />
+
+    <button type="submit">Predict</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById("placementForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        CGPA: parseFloat(document.getElementById("CGPA").value),
+        Internships: parseInt(document.getElementById("Internships").value),
+        Projects: parseInt(document.getElementById("Projects").value),
+        Workshops_Certifications: parseInt(document.getElementById("Workshops_Certifications").value),
+        AptitudeTestScore: parseFloat(document.getElementById("AptitudeTestScore").value),
+        SoftSkillsRating: parseFloat(document.getElementById("SoftSkillsRating").value),
+        ExtracurricularActivities: parseInt(document.getElementById("ExtracurricularActivities").value),
+        PlacementTraining: parseInt(document.getElementById("PlacementTraining").value),
+        SSC_Marks: parseFloat(document.getElementById("SSC_Marks").value),
+        HSC_Marks: parseFloat(document.getElementById("HSC_Marks").value)
+      };
+
+      const res = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      const outputDiv = document.getElementById("result");
+
+      outputDiv.innerHTML = `
+        Placement Prediction: 
+        <span style="color: ${result.predicted_class ? 'green' : 'red'};">
+          ${result.predicted_class ? 'Likely Placed 🎉' : 'Not Likely 😞'}
+        </span><br>
+        Probability: ${
+          result.placement_probability
+            ? (result.placement_probability * 100).toFixed(2) + '%'
+            : 'N/A'
+        }
+      `;
+    });
+  </script>
+</body>
+</html>
